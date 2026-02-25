@@ -28,6 +28,7 @@ const AddProductForm = ({ user }) => {
         const result = await addProduct(formData);
 
 
+        console.log("here");
         if (result.error) {
             toast.error(result.error);
         }
@@ -35,6 +36,8 @@ const AddProductForm = ({ user }) => {
             toast.success(result.message || "Product tracked successfully");
             setUrl("");
         }
+
+        setLoading(false);
     }
 
     return (

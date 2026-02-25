@@ -44,7 +44,7 @@ export async function addProduct(formData){
 
         const {data:existingProduct}=await supabase
         .from("products")
-        .select("id,current_price")  
+        .select("id, current_price")  
         .eq("user_id",user.id)
         .eq("url",url)
         .single();
@@ -66,8 +66,8 @@ export async function addProduct(formData){
         ignoreDuplicates:false, //Always update if exists
     }
 )
-.select()
-.single()
+    .select()
+    .single()
 
     if(error) throw error;
 
