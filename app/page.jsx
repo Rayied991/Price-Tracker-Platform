@@ -15,20 +15,19 @@ export default async function Home() {
   const FEATURES = [
     {
       icon: Rabbit,
-      title: "Lightning Fast",
+      title: "Lightning Fast ⚡",
       description:
-        "Deal Drop extracts prices in seconds, handling JavaScript and dynamic content",
+        "Extracts prices in seconds, cutting through any page with speed and precision",
     },
     {
       icon: Shield,
-      title: "Always Reliable",
-      description:
-        "Works across all major e-commerce sites with built-in anti-bot protection",
+      title: "Always Reliable 🛡️",
+      description: "Tracks prices 24/7 across all major e-commerce sites without missing a beat.",
     },
     {
       icon: Bell,
-      title: "Smart Alerts",
-      description: "Get notified instantly when prices drop below your target",
+      title: "Smart Alerts 🔔",
+      description: "Be the first to know — get instant notifications the moment a deal drops.",
     },
   ];
 
@@ -52,7 +51,7 @@ export default async function Home() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-6 py-2 rounded-full
-          text-sm font-medium mb-6">Made With Love by Me</div>
+          text-sm font-medium mb-6">💸 Save Money Instantly · Your Wallet Will Thank You ✨</div>
           <h2 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight">Never Miss a Price Drop</h2>
           <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
             Track Prices from any e-commerce site. Get instant alerts when prices drop. Save money effortlessly.
