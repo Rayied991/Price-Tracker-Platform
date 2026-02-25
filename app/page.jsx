@@ -3,6 +3,7 @@ import AuthButton from "@/components/AuthButton";
 import { createClient } from "@/utils/supabase/server";
 import { Bell, Rabbit, Shield, TrendingDown } from "lucide-react";
 import Image from "next/image";
+import { getProducts } from "./actions";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const products = [];
+  const products = user ? await getProducts() : [];
   const FEATURES = [
     {
       icon: Rabbit,
@@ -75,6 +76,14 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {user & products.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 pb-20">
+
+        </section>
+      )}
+
+
 
       {user && products.length === 0 && (
         <section className="max-w-2xl mx-auto px-4 pb-20 text-center">
