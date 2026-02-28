@@ -89,9 +89,10 @@ export async function POST(request){
                 oldPrice,
                 newPrice
               );
+              console.log("Email result:", JSON.stringify(emailResult));
 
               if (emailResult.success) {
-                results.alertsSent++;
+                results.alertSent++;
               }
             }
           }
@@ -115,5 +116,4 @@ export async function POST(request){
     }
 }
 
-// Curl -X POST https://url.vercel.app/api/cron/check-prices \
-// -H "Authorization: Bearer cron_secret"
+// Curl.exe -X POST https://getpricedeals.vercel.app/api/cron/check-prices -H "Authorization: Bearer acb147ed525d4e9d307a6b27315c32fb1a93af13d0b1f6b23b4fdc9a76693d87"
