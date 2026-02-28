@@ -1,4 +1,4 @@
-# DealDrop - Smart Product Price Tracker
+#  Smart Product Price Tracker
 
 Track product prices across e-commerce sites and get alerts on price drops. Built with Next.js, Firecrawl, and Supabase.
 
