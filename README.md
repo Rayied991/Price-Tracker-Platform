@@ -1,11 +1,10 @@
-# Smart Product Price Tracker
+# DealDrop - Smart Product Price Tracker
 
-Track product prices across e-commerce sites and get instant alerts on price drops. Built with Next.js, Firecrawl, Supabase, and Resend.
+Track product prices across e-commerce sites and get alerts on price drops. Built with Next.js, Firecrawl, and Supabase.
 
 ## 🎯 Features
 
 - 🔍 **Track Any Product** - Works with Amazon, Zara, Walmart, and more
-- 🔗 **Short URL Support** - Automatically resolves short URLs (a.co, amzn.to, etc.)
 - 📊 **Price History Charts** - Interactive graphs showing price trends over time
 - 🔐 **Google Authentication** - Secure sign-in with Google OAuth
 - 🔄 **Automated Daily Checks** - Scheduled cron jobs check prices automatically
@@ -162,7 +161,7 @@ SELECT cron.schedule(
 );
 ```
 
-> ⚠️ Update the URL and Authorization Bearer token in the function after deployment.
+**Note:** Update the URL and Authorization Bearer token in the function after deployment.
 
 #### Enable Google Authentication
 
@@ -191,10 +190,7 @@ SELECT cron.schedule(
 
 1. Sign up at [resend.com](https://resend.com)
 2. Get your API key from the dashboard
-3. For **testing**: use `onboarding@resend.dev` as the sender — emails will only deliver to your Resend account's registered email address
-4. For **production**: verify your own domain at resend.com/domains and use `noreply@yourdomain.com`
-
-> ⚠️ **Important:** With `onboarding@resend.dev`, Resend only delivers to the email you signed up with. To send alerts to real users, you must verify a custom domain.
+3. (Optional) Add and verify your domain for custom email addresses
 
 ### 5. Environment Variables
 
@@ -211,9 +207,9 @@ FIRECRAWL_API_KEY=your_firecrawl_api_key
 
 # Resend
 RESEND_API_KEY=your_resend_api_key
-RESEND_FROM_EMAIL=onboarding@resend.dev   # replace with your verified domain in production
+RESEND_FROM_EMAIL=onboarding@resend.dev
 
-# Cron Job Security
+# Cron Job Security (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
 CRON_SECRET=your_generated_cron_secret
 
 # App URL
@@ -238,25 +234,36 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Deploy to Vercel
 
-1. Connect your GitHub repository to Vercel for automatic deployments, or use the CLI:
+1. **Install Vercel CLI** (optional)
 
    ```bash
    npm install -g vercel
+   ```
+
+2. **Deploy**
+
+   ```bash
    vercel --prod
    ```
 
-2. **Add Environment Variables in Vercel** — add all variables from `.env.local`:
+   Or connect your GitHub repository to Vercel for automatic deployments.
+
+3. **Add Environment Variables in Vercel**
+
+   Go to your project settings and add all variables from `.env.local`:
 
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` ⚠️ (never expose publicly)
+   - `SUPABASE_SERVICE_ROLE_KEY` ⚠️
    - `FIRECRAWL_API_KEY`
    - `RESEND_API_KEY`
    - `RESEND_FROM_EMAIL`
    - `CRON_SECRET`
    - `NEXT_PUBLIC_APP_URL` (set to your Vercel URL)
 
-3. **Update Supabase Cron Function** with your production URL:
+4. **Update Supabase Cron Function**
+
+   After deployment, update the cron function with your production URL:
 
    ```sql
    CREATE OR REPLACE FUNCTION trigger_price_check()
@@ -276,48 +283,39 @@ Open [http://localhost:3000](http://localhost:3000)
    $$;
    ```
 
-4. **Update Google OAuth Redirect URI** — add your Vercel domain to Google Cloud Console authorized redirect URIs.
+5. **Update Google OAuth Redirect URI**
+
+   Add your Vercel domain to Google Cloud Console authorized redirect URIs.
 
 ## 🔍 How It Works
 
 ### User Flow
 
-1. **User adds product** — paste any e-commerce URL (including short URLs like `a.co/...`)
-2. **URL resolved** — short URLs are automatically expanded to their full form before scraping
-3. **Firecrawl scrapes** — extracts product name, price, currency, and image
-4. **Data stored** — product saved to Supabase with the full resolved URL
-5. **View tracking** — see current price and interactive price history chart
+1. **User adds product** - Paste any e-commerce URL on the homepage
+2. **Firecrawl scrapes** - Instantly extracts product name, price, currency, and image
+3. **Data stored** - Product saved to Supabase with Row Level Security
+4. **View tracking** - See current price and interactive price history chart
 
 ### Automated Price Checking
 
-1. **Supabase pg_cron** runs daily at 9 AM UTC
-2. **Triggers API endpoint** — makes a secure POST request to `/api/cron/check-prices`
-3. **Firecrawl re-scrapes all products** and compares prices
-4. **Updates database** — saves new prices and adds to history if changed
-5. **Sends email alerts** via Resend when a price drops
-
-### Short URL Handling
-
-Amazon and other retailers use short URLs (`a.co`, `amzn.to`) that redirect to the full product page. Firecrawl cannot reliably scrape these redirects, so the app resolves them first:
-
-```js
-async function resolveUrl(url) {
-  const response = await fetch(url, { method: "HEAD", redirect: "follow" });
-  return response.url || url;
-}
-```
-
-The resolved full URL is saved to the database so cron jobs always scrape the stable, direct product URL.
+1. **Supabase pg_cron** - Runs daily at 9 AM UTC
+2. **Triggers API endpoint** - Makes secure POST request to `/api/cron/check-prices`
+3. **Firecrawl scrapes all products** - Updates prices for all tracked products
+4. **Updates database** - Saves new prices and adds to history if changed
+5. **Sends email alerts** - Notifies users via Resend when prices drop
 
 ### Why Firecrawl?
 
 Firecrawl solves the hard problems of web scraping:
 
-- ✅ **JavaScript Rendering** — handles dynamic content loaded via JS
-- ✅ **Anti-bot Bypass** — built-in mechanisms to avoid detection
-- ✅ **Rotating Proxies** — prevents IP blocking
-- ✅ **AI-Powered Extraction** — uses prompts to extract structured data
-- ✅ **Multi-site Support** — same code works across different e-commerce platforms
+- ✅ **JavaScript Rendering** - Handles dynamic content loaded via JS
+- ✅ **Anti-bot Bypass** - Built-in mechanisms to avoid detection
+- ✅ **Rotating Proxies** - Prevents IP blocking
+- ✅ **AI-Powered Extraction** - Uses prompts to extract structured data
+- ✅ **Multi-site Support** - Same code works across different e-commerce platforms
+- ✅ **Fast & Reliable** - Built for production use
+
+No need to maintain brittle, site-specific scrapers!
 
 ## 📁 Project Structure
 
@@ -340,7 +338,7 @@ dealdrop/
 │   ├── PriceChart.js                   # Recharts price history
 │   └── AuthModal.js                    # Google sign-in modal
 ├── lib/
-│   ├── firecrawl.js                    # Firecrawl API + short URL resolver
+│   ├── firecrawl.js                    # Firecrawl API integration
 │   ├── email.js                        # Resend email templates
 │   └── utils.js                        # Utility functions
 ├── utils/
@@ -352,48 +350,35 @@ dealdrop/
 │   └── migrations/
 │       ├── 001_schema.sql              # Database tables & RLS
 │       └── 002_setup_cron.sql          # Cron job setup
-├── proxy.ts                            # Next.js proxy
+├── proxy.ts                            # Next.js 15 proxy (replaces middleware)
 └── .env.local                          # Environment variables
 ```
 
 ## 🧪 Testing
 
-### Test the Cron Endpoint
+### Test with cURL
 
 ```bash
-# Local
-curl -X POST http://localhost:3000/api/cron/check-prices \
-  -H "Authorization: Bearer your_cron_secret"
-
-# Production
 curl -X POST https://your-app.vercel.app/api/cron/check-prices \
-  -H "Authorization: Bearer your_cron_secret"
+  -H "Authorization: Bearer your_cron_secret" \
+  -H "Content-Type: application/json"
 ```
-
-> ⚠️ **Common mistake:** Do not double the `https://` in the URL. Use `https://your-app.vercel.app/...`, not `https://https://your-app.vercel.app/...`
 
 ### Verify Cron Job
 
-```sql
--- Check scheduled jobs
-SELECT * FROM cron.job;
+Check if cron is scheduled:
 
--- View run history
+```sql
+SELECT * FROM cron.job;
+```
+
+View cron run history:
+
+```sql
 SELECT * FROM cron.job_run_details
 ORDER BY start_time DESC
 LIMIT 10;
 ```
-
-### Test Email Alerts Locally
-
-Since prices rarely change between test runs, temporarily inflate the old price to trigger the alert path:
-
-```js
-// In route.js — temporary test only, remove after confirming emails work
-const oldPrice = parseFloat(product.current_price) + 50;
-```
-
-Then run the curl command and check your terminal for `Email result: {"success":true,...}`.
 
 ## 🎨 Customization
 
@@ -402,60 +387,64 @@ Then run the curl command and check your terminal for `Email result: {"success":
 Edit the cron expression in `002_setup_cron.sql`:
 
 ```sql
-'0 9 * * *'      -- Daily at 9 AM UTC
-'0 */6 * * *'    -- Every 6 hours
-'0 9,21 * * *'   -- Daily at 9 AM and 9 PM
-'0 9 * * 1'      -- Every Monday at 9 AM
+-- Daily at 9 AM UTC
+'0 9 * * *'
+
+-- Every 6 hours
+'0 */6 * * *'
+
+-- Daily at 9 AM and 9 PM
+'0 9,21 * * *'
+
+-- Every Monday at 9 AM
+'0 9 * * 1'
 ```
 
 ### Email Template
 
-Customize the HTML template in `lib/email.js` to change styling or content.
+Customize the email template in `lib/email.js` - modify HTML, styling, or content.
 
-### Extract More Product Data
+### Add More Product Data
 
-Update the Firecrawl prompt in `lib/firecrawl.js`:
+Update the Firecrawl prompt in `lib/firecrawl.js` to extract additional fields:
 
-```js
+```javascript
 prompt: "Extract product name, price, currency, image URL, brand, rating, and availability";
 ```
 
 ## 🐛 Troubleshooting
 
-### `curl: (6) Could not resolve host: https`
-
-You have a duplicate `https://` in your curl command. Use:
-```bash
-curl -X POST https://your-app.vercel.app/api/cron/check-prices ...
-#                 ↑ only one https://
-```
-
-### `Failed to scrape product: No data extracted from URL`
-
-Amazon short URLs (`a.co/...`) are not scraped directly — they need to be resolved first. Make sure `resolveUrl()` is called in `firecrawl.js` before passing the URL to Firecrawl. The app resolves and saves the full URL on first add so cron jobs work reliably.
-
-### Email alerts not sending to Gmail
-
-Using `onboarding@resend.dev` as the sender only allows delivery to the email registered on your Resend account. To send to any Gmail address, verify a custom domain at [resend.com/domains](https://resend.com/domains) and update `RESEND_FROM_EMAIL` in your environment variables.
-
-### `priceChanges: 0` in cron results
-
-The scraped price matches what's already in the database — no change occurred. This is normal. Use the `+50` test trick described above to verify the email pipeline end-to-end.
-
 ### Products not found in cron job
 
-Ensure `SUPABASE_SERVICE_ROLE_KEY` is set (not just the anon key). The service role key bypasses RLS and allows the cron job to access all users' products.
+- Make sure `SUPABASE_SERVICE_ROLE_KEY` is set in Vercel
+- Service role bypasses RLS to access all products
+
+### Firecrawl extraction fails
+
+- Some sites may be difficult to scrape
+- Check Firecrawl dashboard for error logs
+- Try adjusting the extraction prompt
+
+### Email alerts not sending
+
+- Verify `RESEND_API_KEY` is correct
+- Check Resend dashboard for delivery logs
+- Ensure sender email is verified (for custom domains)
 
 ### Cron job not running
 
-1. Check the job exists: `SELECT * FROM cron.job;`
-2. Verify the URL and Authorization header in the cron SQL function are correct
-3. Check Supabase logs for HTTP errors
+- Check cron job exists: `SELECT * FROM cron.job;`
+- Verify the function URL and Authorization header are correct
+- Check Supabase logs for errors
 
 ## 🤝 Contributing
 
+Contributions are welcome! Please follow these steps:
+
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
+2. Create a feature branch (`git checkout -b feature/amazing-feature1`)
+3. Commit your changes (`git commit -m 'Add amazing feature1'`)
+4. Push to the branch (`git push origin feature/amazing-feature1`)
 5. Open a Pull Request
+
+
